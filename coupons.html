@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brilliant Driving School - Official Driving Coupons</title>
+    <title>DriveMaster - Official Driving Coupons</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -101,6 +101,132 @@
 
         .btn-primary { background: var(--accent); color: white; }
         .btn-success { background: #15803d; color: white; }
+        button:disabled {
+            background: #cbd5e1 !important;
+            color: #64748b !important;
+            cursor: not-allowed;
+        }
+
+        /* ==================== SAVED STUDENTS ==================== */
+        .students-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            margin-top: 2rem;
+        }
+
+        .students-toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .students-toolbar input, .students-toolbar select {
+            flex: 1;
+        }
+
+        .student-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .student-row .s-name { font-weight: 600; }
+        .student-row .s-meta { color: #64748b; font-size: 0.88rem; margin-top: 2px; }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .badge-active { background: #dbeafe; color: #1e40af; }
+        .badge-complete { background: #dcfce7; color: #15803d; }
+
+        .student-row-actions { display: flex; gap: 8px; }
+
+        .btn-small {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 2px solid #cbd5e1;
+            color: #334155;
+        }
+
+        .btn-danger { background: #dc2626; color: white; }
+
+        .empty-note { color: #64748b; text-align: center; padding: 1rem 0; }
+
+        /* ==================== LOGIN GATE ==================== */
+        #login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-box {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .login-box h2 { text-align: center; }
+        .login-box p.subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 1.5rem;
+            margin-top: -1rem;
+        }
+
+        #login-error {
+            display: none;
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-logout {
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: #334155;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        #app-shell { display: none; }
+
+        .loading-note { text-align: center; color: #64748b; padding: 3rem 0; }
+
+        .complete-banner {
+            display: none;
+            background: #fef2f2;
+            border: 2px solid #fecaca;
+            color: #b91c1c;
+            font-weight: 700;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
 
         /* ==================== COUPON ==================== */
         .coupon {
@@ -126,7 +252,7 @@
         }
 
         .coupon::before {
-            content: "BRILLIANT DRIVING SCHOOL";
+            content: "DRIVEMASTER";
             position: absolute;
             top: 50%;
             left: 50%;
@@ -233,7 +359,7 @@
                 page-break-inside: avoid;
             }
 
-            header, main > .card:first-child, button, .card > h2 {
+            header, main > .card:first-child, button, .card > h2, .students-card {
                 display: none !important;
             }
 
@@ -244,20 +370,46 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+    <!-- ====== FILL THESE IN (see SETUP.md) ====== -->
+    <script>
+        const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    </script>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>DriveMaster Login</h2>
+            <p class="subtitle">Staff sign-in required</p>
+            <div id="login-error"></div>
+            <div class="form-group">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" placeholder="you@drivemaster.com">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" placeholder="••••••••">
+            </div>
+            <button class="btn-primary" style="width:100%;" onclick="login()">Sign In</button>
+        </div>
+    </div>
+
+    <div id="app-shell">
     <div class="container">
         <header>
             <div class="logo-area">
-                <img src="logo.png" alt="Brilliant Driving School Logo" class="school-logo" onerror="this.style.display='none'">
+                <img src="logo.jpg" alt="DriveMaster Logo" class="school-logo" onerror="this.style.display='none'">
                 <div>
-                    <div class="app-title">Brilliant Driving School</div>
-                    <small style="color:#64748b;">Practical Driving Course</small>
+                    <div class="app-title">DriveMaster</div>
+                    <small style="color:#64748b;">Driving School</small>
                 </div>
             </div>
-            <div>
+            <div style="text-align:right;">
                 <h1 style="font-size:1.4rem; color:#334155;">Official Training Management</h1>
-                <div id="current-date" style="text-align:right; color:#64748b;"></div>
+                <div id="current-date" style="color:#64748b;"></div>
+                <button class="btn-logout" style="margin-top:8px;" onclick="logout()">Log Out</button>
             </div>
         </header>
 
@@ -265,7 +417,16 @@
             <!-- Form -->
             <div class="card">
                 <h2>New Driving Coupon</h2>
-                
+
+                <input type="hidden" id="student-id" value="">
+
+                <div class="form-group">
+                    <label for="load-student">Load Existing Student</label>
+                    <select id="load-student" onchange="loadStudent(this.value)">
+                        <option value="">-- New Student --</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="student-name">Student Full Name</label>
                     <input type="text" id="student-name" placeholder="e.g. John Doe" required>
@@ -301,8 +462,9 @@
                 </div>
 
                 <div class="button-group">
-                    <button class="btn-primary" onclick="generateCoupon()">Generate Coupon</button>
-                    <button class="btn-success" onclick="saveAndPrint()">Save & Print</button>
+                    <button class="btn-primary" onclick="saveStudent()">Save Student</button>
+                    <button class="btn-success" id="print-btn" onclick="saveAndPrint()">Save & Print</button>
+                    <button class="btn-outline" onclick="newStudent()">New Student</button>
                 </div>
             </div>
 
@@ -310,10 +472,12 @@
             <div class="card">
                 <h2>Coupon Preview</h2>
                 <div class="coupon" id="coupon-content">
-                    <img src="logo.png" alt="School Logo" class="coupon-logo" onerror="this.style.display='none'">
-                    
+                    <img src="logo.jpg" alt="School Logo" class="coupon-logo" onerror="this.style.display='none'">
+
+                    <div class="complete-banner" id="complete-banner">TRAINING COMPLETED — NOT VALID FOR REPRINT</div>
+
                     <div class="coupon-header">
-                        <div class="coupon-title">BRILLIANT DRIVING SCHOOL</div>
+                        <div class="coupon-title">DRIVE MASTER</div>
                         <div class="coupon-subtitle">Official Driving Training Coupon</div>
                     </div>
                     
@@ -339,49 +503,299 @@
                         <div class="duration-text" id="preview-duration">3 / 30</div>
                         <div style="margin-top:8px; color:#64748b;">Days Completed</div>
                     </div>
-<br>
+
                     <div class="footer">
-                            Hii sio Mbadala wa Learner.Tafadhali beba learner yako wakati wa mafunzo<br>
-                        <br><strong>Brilliant Driving School • Authorized Training Provider</strong>
+                        This coupon is valid only for scheduled practical sessions.<br>
+                        <strong>DriveMaster Driving School • Authorized Training Provider</strong>
                     </div>
                 </div>
             </div>
         </main>
+
+        <div class="students-card">
+            <h2>Saved Students</h2>
+            <div class="students-toolbar">
+                <input type="text" id="student-search" placeholder="Search by name..." oninput="renderStudentList()">
+                <select id="status-filter" onchange="renderStudentList()">
+                    <option value="all">All</option>
+                    <option value="active">Active</option>
+                    <option value="complete">Completed</option>
+                </select>
+            </div>
+            <div id="student-list"></div>
+        </div>
+    </div>
     </div>
 
     <script>
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ---------- Auth ----------
+        async function checkSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                showApp();
+            } else {
+                showLogin();
+            }
+        }
+
+        function showApp() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-shell').style.display = 'block';
+            updateDate();
+            refreshStudents();
+        }
+
+        function showLogin() {
+            document.getElementById('app-shell').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+        }
+
+        async function login() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorBox = document.getElementById('login-error');
+            errorBox.style.display = 'none';
+
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                errorBox.textContent = error.message;
+                errorBox.style.display = 'block';
+                return;
+            }
+            showApp();
+        }
+
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            showLogin();
+        }
+
+        // ---------- Date handling ----------
         function updateDate() {
             const now = new Date();
-            document.getElementById('current-date').textContent = 
+            document.getElementById('current-date').textContent =
                 now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-            document.getElementById('preview-date').textContent = 
+            document.getElementById('preview-date').textContent =
                 now.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+        }
+
+        // ---------- Coupon preview ----------
+        function isTrainingComplete() {
+            const attended = parseInt(document.getElementById('attended-days').value) || 0;
+            const total = parseInt(document.getElementById('total-days').value) || 0;
+            return attended >= total;
         }
 
         function generateCoupon() {
             document.getElementById('preview-student').textContent = document.getElementById('student-name').value || "Student Name";
             document.getElementById('preview-instructor').textContent = document.getElementById('instructor').value || "Instructor";
             document.getElementById('preview-vehicle').textContent = document.getElementById('vehicle').value || "Vehicle not selected";
-            
+
             const attended = document.getElementById('attended-days').value || 1;
             const total = document.getElementById('total-days').value;
             document.getElementById('preview-duration').textContent = `${attended} / ${total}`;
+
+            const complete = isTrainingComplete();
+            const banner = document.getElementById('complete-banner');
+            const printBtn = document.getElementById('print-btn');
+
+            banner.style.display = complete ? 'block' : 'none';
+            printBtn.disabled = complete;
+            printBtn.textContent = complete ? 'Training Complete' : 'Save & Print';
         }
 
         function printCoupon() {
             generateCoupon();
+            if (isTrainingComplete()) {
+                alert('This student has completed all training days. Printing is disabled — no further coupons can be issued.');
+                return;
+            }
             window.print();
         }
 
-        function saveAndPrint() {
-            generateCoupon();
-            window.print();
+        async function saveAndPrint() {
+            const ok = await saveStudent();
+            if (ok) printCoupon();
         }
 
-        window.onload = () => {
-            updateDate();
+        // ---------- Student CRUD (Supabase) ----------
+        function readForm() {
+            return {
+                name: document.getElementById('student-name').value.trim(),
+                total_days: parseInt(document.getElementById('total-days').value) || 0,
+                attended_days: parseInt(document.getElementById('attended-days').value) || 0,
+                vehicle: document.getElementById('vehicle').value,
+                instructor: document.getElementById('instructor').value.trim(),
+                updated_at: new Date().toISOString()
+            };
+        }
+
+        async function saveStudent() {
+            const data = readForm();
+            if (!data.name) {
+                alert("Please enter the student's full name before saving.");
+                return false;
+            }
+
+            const id = document.getElementById('student-id').value;
+            let error;
+
+            if (id) {
+                ({ error } = await supabaseClient.from('students').update(data).eq('id', id));
+            } else {
+                const { data: inserted, error: insertError } = await supabaseClient
+                    .from('students')
+                    .insert(data)
+                    .select()
+                    .single();
+                error = insertError;
+                if (!error && inserted) {
+                    document.getElementById('student-id').value = inserted.id;
+                }
+            }
+
+            if (error) {
+                alert('Could not save: ' + error.message);
+                return false;
+            }
+
+            await refreshStudents();
             generateCoupon();
-        };
+            return true;
+        }
+
+        async function loadStudent(id) {
+            if (!id) {
+                newStudent();
+                return;
+            }
+            const { data: student, error } = await supabaseClient
+                .from('students')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error || !student) return;
+
+            document.getElementById('student-id').value = student.id;
+            document.getElementById('student-name').value = student.name;
+            document.getElementById('total-days').value = student.total_days;
+            document.getElementById('attended-days').value = student.attended_days;
+            document.getElementById('vehicle').value = student.vehicle;
+            document.getElementById('instructor').value = student.instructor;
+            document.getElementById('load-student').value = student.id;
+
+            generateCoupon();
+        }
+
+        async function deleteStudent(id, evt) {
+            if (evt) evt.stopPropagation();
+            if (!confirm('Delete this student record? This cannot be undone.')) return;
+
+            const { error } = await supabaseClient.from('students').delete().eq('id', id);
+            if (error) {
+                alert('Could not delete: ' + error.message);
+                return;
+            }
+
+            if (document.getElementById('student-id').value === id) {
+                newStudent();
+            }
+
+            await refreshStudents();
+        }
+
+        function newStudent() {
+            document.getElementById('student-id').value = '';
+            document.getElementById('student-name').value = '';
+            document.getElementById('total-days').value = '5';
+            document.getElementById('attended-days').value = '1';
+            document.getElementById('vehicle').value = '';
+            document.getElementById('instructor').value = '';
+            document.getElementById('load-student').value = '';
+            generateCoupon();
+        }
+
+        // ---------- Fetch + render ----------
+        let allStudents = [];
+
+        async function refreshStudents() {
+            const { data, error } = await supabaseClient
+                .from('students')
+                .select('*')
+                .order('name', { ascending: true });
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+            allStudents = data || [];
+            populateLoadDropdown();
+            renderStudentList();
+        }
+
+        function populateLoadDropdown() {
+            const select = document.getElementById('load-student');
+            const current = select.value;
+
+            select.innerHTML = '<option value="">-- New Student --</option>' +
+                allStudents.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+
+            select.value = current;
+        }
+
+        function renderStudentList() {
+            const search = document.getElementById('student-search').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+            const container = document.getElementById('student-list');
+
+            const filtered = allStudents.filter(s => {
+                const matchesSearch = s.name.toLowerCase().includes(search);
+                const complete = s.attended_days >= s.total_days;
+                const matchesStatus = statusFilter === 'all' ||
+                    (statusFilter === 'complete' && complete) ||
+                    (statusFilter === 'active' && !complete);
+                return matchesSearch && matchesStatus;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-note">No saved students yet.</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(s => {
+                const complete = s.attended_days >= s.total_days;
+                return `
+                    <div class="student-row" onclick="loadStudent('${s.id}')" style="cursor:pointer;">
+                        <div>
+                            <div class="s-name">${escapeHtml(s.name)}</div>
+                            <div class="s-meta">${s.attended_days} / ${s.total_days} days &middot; ${escapeHtml(s.instructor || 'No instructor set')}</div>
+                        </div>
+                        <div class="student-row-actions">
+                            <span class="badge ${complete ? 'badge-complete' : 'badge-active'}">${complete ? 'Completed' : 'Active'}</span>
+                            <button class="btn-small btn-danger" onclick="deleteStudent('${s.id}', event)">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        // Allow Enter key to submit login
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('login-password').addEventListener('keydown', e => {
+                if (e.key === 'Enter') login();
+            });
+        });
+
+        checkSession();
     </script>
 </body>
 </html>
