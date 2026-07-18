@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brilliant Driving School - Official Driving Coupons</title>
+    <title>DriveMaster - Official Driving Coupons</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -55,7 +55,7 @@
 
         main {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 320px 1fr 1fr;
             gap: 2rem;
         }
 
@@ -107,13 +107,27 @@
             cursor: not-allowed;
         }
 
-        /* ==================== SAVED STUDENTS ==================== */
+        /* ==================== SAVED STUDENTS / VIEW PANEL ==================== */
         .students-card {
             background: white;
             border-radius: 16px;
             padding: 2rem;
             box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-            margin-top: 2rem;
+            height: fit-content;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-left: 8px;
+            background: #e0e7ff;
+            color: #3730a3;
+            vertical-align: middle;
         }
 
         .students-toolbar {
@@ -257,7 +271,7 @@
         }
 
         .coupon::before {
-            content: "DRIVEMASTER";
+            content: "Brilliant Driving School";
             position: absolute;
             top: 50%;
             left: 50%;
@@ -364,7 +378,7 @@
                 page-break-inside: avoid;
             }
 
-            header, main > .card:first-child, button, .card > h2, .students-card {
+            header, #form-card, button, .card > h2, .students-card {
                 display: none !important;
             }
 
@@ -386,13 +400,15 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <img src="logo.jpg" alt="Brilliant Driving School Logo" class="school-logo" onerror="this.style.display='none'">
+            <div>
+                <img src="logo.png" alt="Brilliant Driving School Logo" class="school-logo" onerror="this.style.display='none'">
+            </div>
             <h2>Brilliant Driving School Login</h2>
             <p class="subtitle">Staff sign-in required</p>
             <div id="login-error"></div>
             <div class="form-group">
                 <label for="login-email">Email</label>
-                <input type="email" id="login-email" placeholder="you@drivemaster.com">
+                <input type="email" id="login-email" placeholder="you@brilliantdrivingschool.com">
             </div>
             <div class="form-group">
                 <label for="login-password">Password</label>
@@ -406,10 +422,10 @@
     <div class="container">
         <header>
             <div class="logo-area">
-                <img src="logo.jpg" alt="Brilliant Driving School Logo" class="school-logo" onerror="this.style.display='none'">
+                <img src="logo.png" alt="Brilliant Driving School Logo" class="school-logo" onerror="this.style.display='none'">
                 <div>
                     <div class="app-title">Brilliant Driving School</div>
-                    <small style="color:#64748b;">Driving School</small>
+                    <small style="color:#64748b;">Practical Training Coupons</small>
                 </div>
             </div>
             <div style="text-align:right;">
@@ -420,13 +436,27 @@
         </header>
 
         <main>
+            <!-- Student view panel (left) -->
+            <div class="students-card">
+                <h2>Students <span class="role-badge" id="role-badge"></span></h2>
+                <div class="students-toolbar">
+                    <input type="text" id="student-search" placeholder="Search by name..." oninput="renderStudentList()">
+                    <select id="status-filter" onchange="renderStudentList()">
+                        <option value="all">All</option>
+                        <option value="active">Active</option>
+                        <option value="complete">Completed</option>
+                    </select>
+                </div>
+                <div id="student-list"></div>
+            </div>
+
             <!-- Form -->
-            <div class="card">
+            <div class="card" id="form-card">
                 <h2>New Driving Coupon</h2>
 
                 <input type="hidden" id="student-id" value="">
 
-                <div class="form-group">
+                <div class="form-group" id="load-student-group">
                     <label for="load-student">Load Existing Student</label>
                     <select id="load-student" onchange="loadStudent(this.value)">
                         <option value="">-- New Student --</option>
@@ -464,7 +494,7 @@
                 
                 <div class="form-group">
                     <label for="instructor">Instructor Name</label>
-                    <input type="text" id="instructor" placeholder="e.g. Kowero" required>
+                    <input type="text" id="instructor" placeholder="e.g.John" required>
                 </div>
 
                 <div class="button-group">
@@ -478,12 +508,12 @@
             <div class="card">
                 <h2>Coupon Preview</h2>
                 <div class="coupon" id="coupon-content">
-                    <img src="logo.jpg" alt="Brilliant Driving School Logo" class="coupon-logo" onerror="this.style.display='none'">
+                    <img src="logo.png" alt="School Logo" class="coupon-logo" onerror="this.style.display='none'">
 
                     <div class="complete-banner" id="complete-banner">TRAINING COMPLETED — NOT VALID FOR REPRINT</div>
 
                     <div class="coupon-header">
-                        <div class="coupon-title">BRILLIANT DRIVING SCHOOL</div>
+                        <div class="coupon-title">Brilliant Driving School</div>
                         <div class="coupon-subtitle">Official Driving Training Coupon</div>
                     </div>
                     
@@ -492,21 +522,21 @@
                     <div class="coupon-info">
                         <div>
                             <div class="info-label">Student Name</div>
-                            <div class="info-value" id="preview-student">John Doe</div>
+                            <div class="info-value" id="preview-student"></div>
                         </div>
                         <div>
                             <div class="info-label">Instructor</div>
-                            <div class="info-value" id="preview-instructor">Kowero</div>
+                            <div class="info-value" id="preview-instructor"></div>
                         </div>
                         <div style="grid-column: span 2;">
                             <div class="info-label">Vehicle</div>
-                            <div class="info-value" id="preview-vehicle">Toyota Cruiser - T 954 AAV</div>
+                            <div class="info-value" id="preview-vehicle"></div>
                         </div>
                     </div>
 
                     <div class="duration">
                         <div style="font-size:0.95rem; color:#64748b;">TRAINING PROGRESS</div>
-                        <div class="duration-text" id="preview-duration">3 / 30</div>
+                        <div class="duration-text" id="preview-duration">0 / 30</div>
                         <div style="margin-top:8px; color:#64748b;">Days Completed</div>
                     </div>
 
@@ -517,40 +547,48 @@
                 </div>
             </div>
         </main>
-
-        <div class="students-card">
-            <h2>Saved Students</h2>
-            <div class="students-toolbar">
-                <input type="text" id="student-search" placeholder="Search by name..." oninput="renderStudentList()">
-                <select id="status-filter" onchange="renderStudentList()">
-                    <option value="all">All</option>
-                    <option value="active">Active</option>
-                    <option value="complete">Completed</option>
-                </select>
-            </div>
-            <div id="student-list"></div>
-        </div>
     </div>
     </div>
 
     <script>
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let currentRole = null;
 
         // ---------- Auth ----------
         async function checkSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                showApp();
+                await enterApp(session);
             } else {
                 showLogin();
             }
         }
 
-        function showApp() {
+        async function enterApp(session) {
+            const { data: profile, error } = await supabaseClient
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
+
+            // Defaults to the more restrictive role if something's missing/misconfigured
+            currentRole = (!error && profile) ? profile.role : 'staff';
+
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app-shell').style.display = 'block';
+
+            applyRoleUI();
             updateDate();
-            refreshStudents();
+            await refreshStudents();
+        }
+
+        function applyRoleUI() {
+            const isAdmin = currentRole === 'admin';
+            document.getElementById('role-badge').textContent = isAdmin ? 'Admin' : 'Staff';
+            document.getElementById('load-student-group').style.display = isAdmin ? 'block' : 'none';
+            if (!isAdmin) {
+                newStudent(); // staff always start from a blank entry, never an edit
+            }
         }
 
         function showLogin() {
@@ -564,17 +602,18 @@
             const errorBox = document.getElementById('login-error');
             errorBox.style.display = 'none';
 
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) {
                 errorBox.textContent = error.message;
                 errorBox.style.display = 'block';
                 return;
             }
-            showApp();
+            await enterApp(data.session);
         }
 
         async function logout() {
             await supabaseClient.auth.signOut();
+            currentRole = null;
             showLogin();
         }
 
@@ -645,7 +684,8 @@
                 return false;
             }
 
-            const id = document.getElementById('student-id').value;
+            const isAdmin = currentRole === 'admin';
+            const id = isAdmin ? document.getElementById('student-id').value : '';
             let error;
 
             if (id) {
@@ -673,6 +713,7 @@
         }
 
         async function loadStudent(id) {
+            if (currentRole !== 'admin') return; // staff can view the list but not open records for editing
             if (!id) {
                 newStudent();
                 return;
@@ -698,6 +739,7 @@
 
         async function deleteStudent(id, evt) {
             if (evt) evt.stopPropagation();
+            if (currentRole !== 'admin') return; // only admins can delete
             if (!confirm('Delete this student record? This cannot be undone.')) return;
 
             const { error } = await supabaseClient.from('students').delete().eq('id', id);
@@ -743,6 +785,8 @@
         }
 
         function populateLoadDropdown() {
+            if (currentRole !== 'admin') return; // staff never see the edit dropdown
+
             const select = document.getElementById('load-student');
             const current = select.value;
 
@@ -756,6 +800,7 @@
             const search = document.getElementById('student-search').value.toLowerCase();
             const statusFilter = document.getElementById('status-filter').value;
             const container = document.getElementById('student-list');
+            const isAdmin = currentRole === 'admin';
 
             const filtered = allStudents.filter(s => {
                 const matchesSearch = s.name.toLowerCase().includes(search);
@@ -773,15 +818,21 @@
 
             container.innerHTML = filtered.map(s => {
                 const complete = s.attended_days >= s.total_days;
+                const rowOpen = isAdmin
+                    ? `<div class="student-row" onclick="loadStudent('${s.id}')" style="cursor:pointer;">`
+                    : `<div class="student-row">`;
+                const deleteBtn = isAdmin
+                    ? `<button class="btn-small btn-danger" onclick="deleteStudent('${s.id}', event)">Delete</button>`
+                    : '';
                 return `
-                    <div class="student-row" onclick="loadStudent('${s.id}')" style="cursor:pointer;">
+                    ${rowOpen}
                         <div>
                             <div class="s-name">${escapeHtml(s.name)}</div>
-                            <div class="s-meta">${s.attended_days} / ${s.total_days} days &middot; ${escapeHtml(s.instructor || 'No instructor set')}</div>
+                            <div class="s-meta">${s.attended_days} out of ${s.total_days} days &middot; ${escapeHtml(s.instructor || 'No instructor set')}</div>
                         </div>
                         <div class="student-row-actions">
                             <span class="badge ${complete ? 'badge-complete' : 'badge-active'}">${complete ? 'Completed' : 'Active'}</span>
-                            <button class="btn-small btn-danger" onclick="deleteStudent('${s.id}', event)">Delete</button>
+                            ${deleteBtn}
                         </div>
                     </div>
                 `;
